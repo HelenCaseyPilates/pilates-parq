@@ -1,0 +1,911 @@
+	<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PAR-Q/PAR-Q+ Questionnaire</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { text-size-adjust: none; scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      background: #f7f6f2;
+      color: #28251d;
+      padding: 1.5rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 740px;
+      background: #fbfbf9;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      padding: 1.75rem 1.5rem 1.5rem;
+    }
+    @media (min-width: 768px) { .app { padding: 2rem 2.25rem 2rem; } }
+    h1 { font-size: 1.55rem; margin-bottom: 0.25rem; line-height: 1.2; }
+    h2 { font-size: 1.15rem; margin-bottom: 0.65rem; line-height: 1.2; }
+    h3 { font-size: 0.95rem; margin-bottom: 0.4rem; line-height: 1.25; }
+    p { margin-bottom: 0.65rem; }
+    .muted { color: #7a7974; font-size: 0.875rem; }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 0.15rem 0.55rem; border-radius: 999px;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+      background: rgba(1,105,111,0.08); color: #01696f; margin-bottom: 0.4rem;
+    }
+
+    .step-indicator {
+      display: flex; gap: 0.45rem; margin: 0.75rem 0 1.25rem;
+      font-size: 0.78rem; align-items: center; flex-wrap: wrap;
+    }
+    .pill {
+      padding: 0.1rem 0.55rem; border-radius: 999px;
+      border: 1px solid #d4d1ca;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+    }
+    .pill-dot { width: 8px; height: 8px; border-radius: 999px; background: #d4d1ca; }
+    .pill--active { border-color: #01696f; background: rgba(1,105,111,0.08); color: #01696f; }
+    .pill--active .pill-dot { background: #01696f; }
+
+    fieldset { border: none; margin: 0; padding: 0; }
+
+    .question {
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.55rem;
+      border: 1px solid #dcd9d5;
+      background: #f9f8f5;
+      margin-bottom: 0.65rem;
+    }
+    .question.error-state { border-color: #a12c7b; }
+    .question legend {
+      font-weight: 500; font-size: 0.92rem; margin-bottom: 0.3rem;
+    }
+    .question small { display: block; font-size: 0.78rem; color: #7a7974; margin-bottom: 0.25rem; }
+    .options { display: flex; gap: 1.1rem; margin-top: 0.3rem; flex-wrap: wrap; }
+    .options label {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.88rem; cursor: pointer;
+    }
+    input[type="radio"], input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; }
+
+    .sub-block {
+      margin-top: 0.6rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #dcd9d5;
+      background: #f3f0ec;
+    }
+    .sub-block h4 { font-size: 0.82rem; color: #7a7974; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .sub-block .question { background: #fbfbf9; }
+
+    textarea {
+      margin-top: 0.3rem; width: 100%;
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.45rem;
+      border: 1px solid #dcd9d5;
+      font: inherit; resize: vertical;
+      background: #fbfbf9;
+    }
+    textarea:focus { outline: 2px solid #01696f; outline-offset: 2px; border-color: transparent; }
+
+    .error-msg { margin-top: 0.3rem; font-size: 0.78rem; color: #a12c7b; }
+
+    .consent-box {
+      margin-top: 0.65rem; padding: 0.75rem;
+      border-radius: 0.55rem; border: 1px dashed #d4d1ca;
+      background: #f3f0ec; font-size: 0.83rem;
+    }
+
+    .section-heading {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: #7a7974; font-weight: 600; margin: 1rem 0 0.6rem;
+      padding-bottom: 0.3rem; border-bottom: 1px solid #dcd9d5;
+    }
+
+    .yes-context-card {
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.55rem;
+      border-left: 3px solid #01696f;
+      background: rgba(1,105,111,0.05);
+      margin-bottom: 0.65rem;
+    }
+    .yes-context-card .context-label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #01696f; font-weight: 600; margin-bottom: 0.25rem;
+    }
+    .yes-context-card .context-q {
+      font-size: 0.9rem; font-weight: 500; margin-bottom: 0.4rem; color: #28251d;
+    }
+
+    .actions {
+      display: flex; flex-wrap: wrap; gap: 0.65rem;
+      margin-top: 1.1rem; justify-content: flex-end;
+    }
+    button {
+      font: inherit; border-radius: 999px;
+      padding: 0.5rem 1.2rem; border: none; cursor: pointer;
+      font-size: 0.88rem; display: inline-flex; align-items: center; gap: 0.4rem;
+      transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.08s ease;
+    }
+    button:active { transform: translateY(1px); }
+    .btn-primary { background: #01696f; color: #f9f8f4; box-shadow: 0 2px 8px rgba(1,105,111,0.35); }
+    .btn-primary:hover { background: #0c4e54; }
+    .btn-secondary { background: transparent; color: #01696f; border: 1px solid #d4d1ca; }
+    .btn-secondary:hover { background: #f3f0ec; }
+    .btn-ghost { background: transparent; color: #7a7974; }
+
+    .status-success {
+      margin-top: 0.75rem; padding: 0.85rem; border-radius: 0.55rem;
+      border: 1px solid #437a22; background: #d4dfcc; font-size: 0.88rem; color: #1e3f0a;
+    }
+    .status-warning {
+      margin-top: 0.75rem; padding: 0.85rem; border-radius: 0.55rem;
+      border: 1px solid #964219; background: #ddcfc6; font-size: 0.88rem; color: #4b2614;
+    }
+
+    .footer-note { margin-top: 1.25rem; font-size: 0.75rem; color: #7a7974; }
+
+    @media (max-width: 480px) {
+      .options { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+<main class="app" aria-labelledby="app-title">
+  <header>
+    <span class="badge">Pilates health screening</span>
+    <h1 id="app-title">PAR-Q/PAR-Q+ Questionnaire</h1>
+    <p class="muted">Complete this health questionnaire before joining a Pilates session. If you answer "Yes" to any question in Step 1, follow-up questions will appear so your instructor can keep you safe.</p>
+  </header>
+
+  <nav aria-label="progress" class="step-indicator">
+    <div class="pill pill--active" id="pill-step-1"><span class="pill-dot"></span>Step 1 · PAR-Q</div>
+    <div class="pill" id="pill-step-2"><span class="pill-dot"></span>Step 2 · PAR-Q+</div>
+    <div class="pill" id="pill-step-3"><span class="pill-dot"></span>Step 3 · Consent</div>
+  </nav>
+
+  <form id="parq-form" novalidate>
+
+    <!-- ======================== STEP 1 ======================== -->
+    <section id="step-1" aria-labelledby="s1-title">
+      <h2 id="s1-title">Step 1 · Physical Activity Readiness (PAR-Q)</h2>
+      <p class="muted">Please read each question carefully and answer honestly. If you are unsure about any answer, select "Yes".</p>
+
+      <div class="question" style="margin-bottom:1rem;">
+        <label for="client-name" style="font-size:0.9rem;font-weight:600;display:block;margin-bottom:0.35rem;">Your Full Name <span style="color:#a12c7b;">*</span></label>
+        <input type="text" id="client-name" name="client_name" placeholder="e.g. Jane Doe" required
+          style="width:100%;padding:0.55rem 0.7rem;border:1px solid #d4d1ca;border-radius:0.5rem;font-size:0.95rem;font-family:inherit;background:#fff;" />
+        <div id="name-error" class="error-msg" aria-live="polite" style="margin-top:0.25rem;"></div>
+      </div>
+
+      <fieldset>
+
+        <div class="question" data-key="q1">
+          <legend>Has your doctor ever said that you have a heart condition (had a stroke, heart attack, or heart surgery) and/or that you should only do physical activity recommended by a doctor?</legend>
+          <div class="options">
+            <label><input type="radio" name="q1" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q1" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q2">
+          <legend>Do you feel pain in your chest when you do physical activity?</legend>
+          <div class="options">
+            <label><input type="radio" name="q2" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q2" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q3">
+          <legend>In the past month, have you had chest pain when you were not doing physical activity?</legend>
+          <div class="options">
+            <label><input type="radio" name="q3" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q3" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q4">
+          <legend>Do you lose your balance because of dizziness or do you ever lose consciousness?</legend>
+          <div class="options">
+            <label><input type="radio" name="q4" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q4" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q5">
+          <legend>Have you ever been told by a doctor that you have bone, joint, or muscle problems that could be made worse by physical activity?</legend>
+          <div class="options">
+            <label><input type="radio" name="q5" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q5" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q6">
+          <legend>Do you have a diagnosed illness that could be made worse by physical activity?</legend>
+          <div class="options">
+            <label><input type="radio" name="q6" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q6" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q7">
+          <legend>Is your doctor currently prescribing medication for your blood pressure or heart condition?</legend>
+          <div class="options">
+            <label><input type="radio" name="q7" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q7" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q8">
+          <legend>Do you know of any other reason why you should not do physical activity?</legend>
+          <div class="options">
+            <label><input type="radio" name="q8" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q8" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q9">
+          <legend>Are you pregnant now or have you given birth within the last 6 months?</legend>
+          <div class="options">
+            <label><input type="radio" name="q9" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q9" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q10">
+          <legend>Have you had a recent surgery?</legend>
+          <div class="options">
+            <label><input type="radio" name="q10" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q10" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+        <div class="question" data-key="q11">
+          <legend>Are you currently on any medications, either prescription or non-prescription, on a regular basis?</legend>
+          <div class="options">
+            <label><input type="radio" name="q11" value="Yes" /> Yes</label>
+            <label><input type="radio" name="q11" value="No" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" id="to-step-2">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ======================== STEP 2 ======================== -->
+    <section id="step-2" aria-labelledby="s2-title" hidden>
+      <h2 id="s2-title">Step 2 · PAR-Q+ Follow-up</h2>
+      <p class="muted">Because you answered "Yes" to one or more questions in Step 1, please complete the questions below. This helps your instructor keep you safe during class.</p>
+
+      <!-- Dynamic "Yes" detail cards – populated by JS -->
+      <div id="yes-detail-cards"></div>
+
+      <!-- Condition screening -->
+      <p class="section-heading">Medical condition screening</p>
+      <p class="muted" style="margin-bottom:0.75rem;">Please answer each section honestly. If you answer "Yes" to a main condition question, additional follow-up questions will appear.</p>
+
+      <fieldset id="condition-fieldset">
+
+        <!-- C1: Arthritis / Osteoporosis / Back -->
+        <div class="question" data-key="c1">
+          <legend>Do you have arthritis, osteoporosis, or back/spinal problems?</legend>
+          <div class="options">
+            <label><input type="radio" name="c1" value="Yes" data-triggers="c1-sub" /> Yes</label>
+            <label><input type="radio" name="c1" value="No" data-hides="c1-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c1-sub" hidden>
+          <h4>Arthritis / Osteoporosis / Back – follow-up</h4>
+          <div class="question" data-key="c1a">
+            <legend>Do you have difficulty controlling this condition with medications or other prescribed therapies?</legend>
+            <small>Answer No if you are not currently taking medications or treatment.</small>
+            <div class="options">
+              <label><input type="radio" name="c1a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c1a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c1b">
+            <legend>Do you have joint problems causing pain, a recent fracture, or a displaced vertebra (e.g. spondylolisthesis)?</legend>
+            <div class="options">
+              <label><input type="radio" name="c1b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c1b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c1c">
+            <legend>Have you had steroid injections or taken steroid tablets regularly for more than 3 months?</legend>
+            <div class="options">
+              <label><input type="radio" name="c1c" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c1c" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C2: Cancer -->
+        <div class="question" data-key="c2">
+          <legend>Have you ever been diagnosed with cancer of any kind?</legend>
+          <div class="options">
+            <label><input type="radio" name="c2" value="Yes" data-triggers="c2-sub" /> Yes</label>
+            <label><input type="radio" name="c2" value="No" data-hides="c2-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c2-sub" hidden>
+          <h4>Cancer – follow-up</h4>
+          <div class="question" data-key="c2a">
+            <legend>Does your diagnosis include any of the following: lung, multiple myeloma, head, or neck cancer?</legend>
+            <div class="options">
+              <label><input type="radio" name="c2a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c2a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c2b">
+            <legend>Are you currently receiving cancer treatment such as chemotherapy or radiotherapy?</legend>
+            <div class="options">
+              <label><input type="radio" name="c2b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c2b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C3: Heart Disease -->
+        <div class="question" data-key="c3">
+          <legend>Do you have heart disease or cardiovascular disease? (e.g. coronary artery disease, high blood pressure, heart failure, irregular heart rhythm)</legend>
+          <div class="options">
+            <label><input type="radio" name="c3" value="Yes" data-triggers="c3-sub" /> Yes</label>
+            <label><input type="radio" name="c3" value="No" data-hides="c3-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c3-sub" hidden>
+          <h4>Heart / Cardiovascular – follow-up</h4>
+          <div class="question" data-key="c3a">
+            <legend>Do you have difficulty controlling this condition with medications or prescribed therapies?</legend>
+            <div class="options">
+              <label><input type="radio" name="c3a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c3a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c3b">
+            <legend>Do you have an irregular heartbeat that requires medical management (e.g. atrial fibrillation)?</legend>
+            <div class="options">
+              <label><input type="radio" name="c3b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c3b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c3c">
+            <legend>Do you have chronic heart failure?</legend>
+            <div class="options">
+              <label><input type="radio" name="c3c" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c3c" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c3d">
+            <legend>Do you have a resting blood pressure equal to or above 160/90 mmHg, with or without medication?</legend>
+            <small>Answer Yes if you are unsure of your resting blood pressure.</small>
+            <div class="options">
+              <label><input type="radio" name="c3d" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c3d" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C4: Metabolic -->
+        <div class="question" data-key="c4">
+          <legend>Do you have a metabolic condition such as Type 1 or Type 2 Diabetes, or Pre-Diabetes?</legend>
+          <div class="options">
+            <label><input type="radio" name="c4" value="Yes" data-triggers="c4-sub" /> Yes</label>
+            <label><input type="radio" name="c4" value="No" data-hides="c4-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c4-sub" hidden>
+          <h4>Metabolic Conditions – follow-up</h4>
+          <div class="question" data-key="c4a">
+            <legend>Is your blood sugar often above 13.0 mmol/L?</legend>
+            <small>Answer Yes if you are unsure.</small>
+            <div class="options">
+              <label><input type="radio" name="c4a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c4a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c4b">
+            <legend>Do you have signs or symptoms of diabetes complications (such as heart/vascular disease, complications affecting your eyes, kidneys, or sensation in your feet)?</legend>
+            <div class="options">
+              <label><input type="radio" name="c4b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c4b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c4c">
+            <legend>Do you have other metabolic conditions such as thyroid disorders, chronic kidney disease, or liver problems?</legend>
+            <div class="options">
+              <label><input type="radio" name="c4c" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c4c" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C5: Mental Health -->
+        <div class="question" data-key="c5">
+          <legend>Do you have a mental health condition or learning difficulty? (e.g. depression, anxiety disorder, eating disorder, dementia, Down syndrome)</legend>
+          <div class="options">
+            <label><input type="radio" name="c5" value="Yes" data-triggers="c5-sub" /> Yes</label>
+            <label><input type="radio" name="c5" value="No" data-hides="c5-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c5-sub" hidden>
+          <h4>Mental Health – follow-up</h4>
+          <div class="question" data-key="c5a">
+            <legend>Do you have difficulty controlling your condition with medications or other prescribed therapies?</legend>
+            <div class="options">
+              <label><input type="radio" name="c5a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c5a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c5b">
+            <legend>Do you also have back problems affecting nerves or muscles?</legend>
+            <div class="options">
+              <label><input type="radio" name="c5b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c5b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C6: Respiratory -->
+        <div class="question" data-key="c6">
+          <legend>Do you have a respiratory disease? (e.g. COPD, asthma, pulmonary hypertension)</legend>
+          <div class="options">
+            <label><input type="radio" name="c6" value="Yes" data-triggers="c6-sub" /> Yes</label>
+            <label><input type="radio" name="c6" value="No" data-hides="c6-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c6-sub" hidden>
+          <h4>Respiratory Disease – follow-up</h4>
+          <div class="question" data-key="c6a">
+            <legend>Do you have difficulty controlling your condition with medications or prescribed therapies?</legend>
+            <div class="options">
+              <label><input type="radio" name="c6a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c6a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c6b">
+            <legend>Has your doctor said your blood oxygen level is low at rest or during exercise, or that you need supplemental oxygen?</legend>
+            <div class="options">
+              <label><input type="radio" name="c6b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c6b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c6c">
+            <legend>If asthmatic, do you currently have symptoms of chest tightness, wheezing, or laboured breathing, or have you used your rescue inhaler more than twice in the last week?</legend>
+            <div class="options">
+              <label><input type="radio" name="c6c" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c6c" value="No" /> No</label>
+              <label><input type="radio" name="c6c" value="Not applicable" /> Not applicable</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C7: Stroke -->
+        <div class="question" data-key="c7">
+          <legend>Have you had a stroke or transient ischemic attack (TIA / mini-stroke)?</legend>
+          <div class="options">
+            <label><input type="radio" name="c7" value="Yes" data-triggers="c7-sub" /> Yes</label>
+            <label><input type="radio" name="c7" value="No" data-hides="c7-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c7-sub" hidden>
+          <h4>Stroke / TIA – follow-up</h4>
+          <div class="question" data-key="c7a">
+            <legend>Do you have difficulty controlling your condition with medications or prescribed therapies?</legend>
+            <div class="options">
+              <label><input type="radio" name="c7a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c7a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c7b">
+            <legend>Do you have any impairment in walking or mobility?</legend>
+            <div class="options">
+              <label><input type="radio" name="c7b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c7b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c7c">
+            <legend>Have you experienced a stroke or nerve/muscle impairment in the past 6 months?</legend>
+            <div class="options">
+              <label><input type="radio" name="c7c" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c7c" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- C8: Other / Multiple conditions -->
+        <div class="question" data-key="c8">
+          <legend>Do you have any other medical condition not listed above, or do you currently live with two or more chronic conditions?</legend>
+          <div class="options">
+            <label><input type="radio" name="c8" value="Yes" data-triggers="c8-sub" /> Yes</label>
+            <label><input type="radio" name="c8" value="No" data-hides="c8-sub" /> No</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+        <div class="sub-block" id="c8-sub" hidden>
+          <h4>Other Conditions – follow-up</h4>
+          <div class="question" data-key="c8a">
+            <legend>Have you experienced a blackout, fainted, or lost consciousness due to a head injury within the last 12 months, or have you been diagnosed with a concussion in the last 12 months?</legend>
+            <div class="options">
+              <label><input type="radio" name="c8a" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c8a" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c8b">
+            <legend>Do you have a medical condition not listed in this form? (e.g. epilepsy, neurological condition, kidney problems)</legend>
+            <div class="options">
+              <label><input type="radio" name="c8b" value="Yes" /> Yes</label>
+              <label><input type="radio" name="c8b" value="No" /> No</label>
+            </div>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+          <div class="question" data-key="c8c">
+            <legend>Please briefly describe the condition(s):</legend>
+            <textarea name="c8c" rows="3" placeholder="e.g. epilepsy managed with medication, chronic kidney disease..."></textarea>
+            <div class="error-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- Clearance -->
+        <p class="section-heading" style="margin-top:1rem;">Medical clearance</p>
+        <div class="question" data-key="clearance">
+          <legend>Has a health professional given you clearance to take part in low‑to‑moderate intensity exercise such as Pilates?</legend>
+          <div class="options">
+            <label><input type="radio" name="clearance" value="Yes – written clearance" /> Yes – written clearance</label>
+            <label><input type="radio" name="clearance" value="Yes – verbal advice only" /> Yes – verbal advice only</label>
+            <label><input type="radio" name="clearance" value="Not yet" /> Not yet</label>
+          </div>
+          <div class="error-msg" aria-live="polite"></div>
+        </div>
+
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" id="back-to-1">← Back</button>
+        <button type="button" class="btn-primary" id="to-step-3">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ======================== STEP 3 ======================== -->
+    <section id="step-3" aria-labelledby="s3-title" hidden>
+      <h2 id="s3-title">Step 3 · Declaration &amp; Consent</h2>
+      <p class="muted">Please read and confirm the declaration below before submitting your form.</p>
+
+      <div class="question">
+        <h3>Declaration</h3>
+        <div class="consent-box">
+          <label style="display:flex;align-items:flex-start;gap:0.55rem;cursor:pointer;">
+            <input type="checkbox" id="consent-checkbox" style="margin-top:0.2rem;" />
+            <span>I confirm that the information I have provided in this form is accurate and complete to the best of my knowledge. I understand that this questionnaire is used to support safe participation in Pilates classes and does not replace professional medical advice. I acknowledge that this clearance is valid for a maximum of 12 months from the date it is completed and becomes invalid if my condition changes. I agree that my instructor may use this information to adapt or postpone sessions if necessary.</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:0.55rem;cursor:pointer;margin-top:0.65rem;">
+            <input type="checkbox" id="age-checkbox" style="margin-top:0.2rem;" />
+            <span>I confirm that I am 16 years of age or over. <em style="font-size:0.8rem;color:#7a7974;">(If completing this form on behalf of a person under 16, please speak with your instructor directly before proceeding — written parental or guardian consent is required under the studio's insurance policy.)</em></span>
+          </label>
+        </div>
+        <div class="error-msg" id="consent-error" aria-live="polite"></div>
+      </div>
+
+      <div id="status-message"></div>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" id="back-to-2">← Back</button>
+        <button type="button" class="btn-secondary" id="download-copy">Download copy</button>
+        <button type="submit" class="btn-primary">Submit &amp; Send</button>
+      </div>
+    </section>
+
+  </form>
+
+  <footer class="footer-note" style="margin-top:1.5rem;border-top:1px solid #dcd9d5;padding-top:1rem;display:flex;flex-direction:column;gap:0.75rem;">
+    <p style="margin:0 0 0.25rem;font-size:0.75rem;color:#7a7974;line-height:1.55;font-style:italic;">Helen Casey has completed her teacher training with Reformation and will sit her final assessment in July. Current session pricing reflects this trainee status and will increase to standard market rates upon full qualification.</p>
+    <div>
+      <strong style="display:block;margin-bottom:0.25rem;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.05em;color:#28251d;">Duty of Care &amp; Insurance (Ireland)</strong>
+      <p style="margin:0;font-size:0.78rem;line-height:1.55;">
+        Under Irish health and safety legislation and the common law duty of care, all fitness professionals and studio operators have a legal obligation to pre-screen clients prior to exercise participation. Completion of a health screening questionnaire such as this one forms part of that duty and supports the studio's public liability and professional indemnity insurance obligations. Fitness professionals in Ireland are required to hold valid <strong>Public Liability</strong> and <strong>Professional Indemnity insurance</strong> in line with Coaching Ireland's Code of Ethics and the requirements of most insurance underwriters. In the event that a client does not disclose a relevant health condition and an incident arises, a completed and signed PAR-Q/PAR-Q+ on record may significantly reduce the studio's legal exposure. This form does not replace a full medical assessment; clients who disclose health conditions should be referred to an appropriate GP or allied health professional before commencing or continuing participation.
+      </p>
+    </div>
+    <div>
+      <strong style="display:block;margin-bottom:0.25rem;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.05em;color:#28251d;">Data Protection &amp; GDPR Notice</strong>
+      <p style="margin:0;font-size:0.78rem;line-height:1.55;">
+        The health information collected in this form constitutes <strong>special category personal data</strong> under Article 9 of the EU General Data Protection Regulation (GDPR) and the Irish Data Protection Act 2018. This data is collected solely for the purpose of assessing a client's readiness to participate in Pilates classes and supporting the studio's duty of care obligations. It will be stored securely with access restricted to authorised studio instructors only. Under GDPR's storage limitation principle, personal data must not be kept for longer than is necessary for its purpose. In line with best practice for health and fitness records in Ireland — and taking into account the two-year limitation period for personal injury claims under the Statute of Limitations (Amendment) Act 1991, and the requirements of General Condition 5 of the studio's professional liability insurance policy (Balens Europe B.V. / Hiscox SA), which mandates retention of records for a minimum of six years from the date of treatment, and the recommended minimum periods issued by the Data Protection Commission (DPC) — completed health screening records will be retained for a minimum of <strong>6 years</strong> from the date of last class attendance, and securely deleted thereafter unless a legal claim is pending. Clients have the right to access, rectify, or request erasure of their personal data at any time by contacting the studio directly. For any queries regarding how your data is stored or used, please speak with your instructor. The Data Protection Commission (DPC) may impose fines of up to €20 million or 4% of global annual turnover for non-compliance with GDPR.
+      </p>
+    </div>
+  </footer>
+</main>
+
+<script>
+  // ── PAR-Q question text (for dynamic Yes cards in Step 2) ──────────────────
+  const parqQuestions = {
+    q1:  'Has your doctor ever said that you have a heart condition (had a stroke, heart attack, or heart surgery) and/or that you should only do physical activity recommended by a doctor?',
+    q2:  'Do you feel pain in your chest when you do physical activity?',
+    q3:  'In the past month, have you had chest pain when you were not doing physical activity?',
+    q4:  'Do you lose your balance because of dizziness or do you ever lose consciousness?',
+    q5:  'Have you ever been told by a doctor that you have bone, joint, or muscle problems that could be made worse by physical activity?',
+    q6:  'Do you have a diagnosed illness that could be made worse by physical activity?',
+    q7:  'Is your doctor currently prescribing medication for your blood pressure or heart condition?',
+    q8:  'Do you know of any other reason why you should not do physical activity?',
+    q9:  'Are you pregnant now or have you given birth within the last 6 months?',
+    q10: 'Have you had a recent surgery?',
+    q11: 'Are you currently on any medications, either prescription or non-prescription, on a regular basis?'
+  };
+
+  // ── Condition sub-blocks config ────────────────────────────────────────────
+  const conditionTriggers = {
+    c1: 'c1-sub', c2: 'c2-sub', c3: 'c3-sub', c4: 'c4-sub',
+    c5: 'c5-sub', c6: 'c6-sub', c7: 'c7-sub', c8: 'c8-sub'
+  };
+
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+  const step1 = document.getElementById('step-1');
+  const step2 = document.getElementById('step-2');
+  const step3 = document.getElementById('step-3');
+  const pill1 = document.getElementById('pill-step-1');
+  const pill2 = document.getElementById('pill-step-2');
+  const pill3 = document.getElementById('pill-step-3');
+  const yesDetailCards = document.getElementById('yes-detail-cards');
+  const statusMessage = document.getElementById('status-message');
+  const consentCheckbox = document.getElementById('consent-checkbox');
+  const consentError = document.getElementById('consent-error');
+  const form = document.getElementById('parq-form');
+
+  // Paste your Google Apps Script Web App URL here after setup
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYC66N6lPMw0tVQP1rr6W2kLD9Oj2VseoM0bRLXUSIRBHGhwkyBxxaO4bsVq4cYENB4A/exec';
+
+  // ── Step navigation ────────────────────────────────────────────────────────
+  function setStep(n) {
+    [step1, step2, step3].forEach((s, i) => { s.hidden = (i + 1) !== n; });
+    [pill1, pill2, pill3].forEach((p, i) => {
+      p.classList.toggle('pill--active', i + 1 === n);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Validation helpers ─────────────────────────────────────────────────────
+  function validateSection(section) {
+    let valid = true;
+    section.querySelectorAll('.question[data-key]').forEach(q => {
+      if (q.closest('[hidden]')) return; // skip hidden sub-blocks
+      const key = q.dataset.key;
+      const errEl = q.querySelector('.error-msg');
+      if (!errEl) return;
+      const radios = q.querySelectorAll(`input[type="radio"][name="${key}"]`);
+      const textarea = q.querySelector(`textarea[name="${key}"]`);
+      let ok = true;
+
+      if (radios.length) {
+        ok = Array.from(radios).some(r => r.checked);
+      } else if (textarea) {
+        // c8c is only required if c8 = Yes
+        if (key === 'c8c') {
+          const c8yes = document.querySelector('input[name="c8"][value="Yes"]');
+          ok = !(c8yes && c8yes.checked) || textarea.value.trim().length > 0;
+        } else {
+          ok = textarea.value.trim().length > 0;
+        }
+      }
+
+      errEl.textContent = ok ? '' : 'Please answer this question.';
+      q.classList.toggle('error-state', !ok);
+      if (!ok) valid = false;
+    });
+    return valid;
+  }
+
+  function validateYesCards() {
+    let valid = true;
+    yesDetailCards.querySelectorAll('textarea').forEach(ta => {
+      const errEl = ta.closest('.yes-context-card').querySelector('.error-msg');
+      const ok = ta.value.trim().length > 0;
+      errEl.textContent = ok ? '' : 'Please provide details for this question.';
+      if (!ok) valid = false;
+    });
+    return valid;
+  }
+
+  // ── Build dynamic Yes detail cards ────────────────────────────────────────
+  function buildYesCards() {
+    yesDetailCards.innerHTML = '';
+    const yesKeys = Object.keys(parqQuestions).filter(k => {
+      const r = document.querySelector(`input[name="${k}"][value="Yes"]`);
+      return r && r.checked;
+    });
+
+    if (yesKeys.length === 0) return;
+
+    const heading = document.createElement('p');
+    heading.className = 'section-heading';
+    heading.textContent = 'Details for your "Yes" answers';
+    yesDetailCards.appendChild(heading);
+
+    yesKeys.forEach(k => {
+      const card = document.createElement('div');
+      card.className = 'yes-context-card';
+      card.innerHTML = `
+        <div class="context-label">You answered Yes to:</div>
+        <div class="context-q">${parqQuestions[k]}</div>
+        <label style="font-size:0.85rem;font-weight:500;display:block;margin-bottom:0.2rem;">Please provide more details about this:</label>
+        <textarea name="yes_detail_${k}" rows="3" placeholder="e.g. diagnosed in 2020, managed with medication, no current symptoms..."></textarea>
+        <div class="error-msg" aria-live="polite"></div>
+      `;
+      yesDetailCards.appendChild(card);
+    });
+  }
+
+  // ── Sub-block show/hide ────────────────────────────────────────────────────
+  document.getElementById('condition-fieldset').addEventListener('change', e => {
+    const radio = e.target;
+    if (!radio.matches('input[type="radio"]')) return;
+    const name = radio.name;
+    if (conditionTriggers[name]) {
+      const subBlock = document.getElementById(conditionTriggers[name]);
+      if (subBlock) {
+        subBlock.hidden = radio.value !== 'Yes';
+        // Clear sub-answers if hidden
+        if (subBlock.hidden) {
+          subBlock.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+          subBlock.querySelectorAll('textarea').forEach(t => t.value = '');
+          subBlock.querySelectorAll('.error-msg').forEach(e => e.textContent = '');
+          subBlock.querySelectorAll('.question').forEach(q => q.classList.remove('error-state'));
+        }
+      }
+    }
+  });
+
+  // ── Collect all form data ──────────────────────────────────────────────────
+  function collectData() {
+    const fd = new FormData(form);
+    const data = {};
+    for (const [k, v] of fd.entries()) data[k] = v;
+    return data;
+  }
+
+  // ── Download JSON copy ─────────────────────────────────────────────────────
+  function downloadJSON(data) {
+    const blob = new Blob([JSON.stringify({ submittedAt: new Date().toISOString(), responses: data }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `parq-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Button listeners ───────────────────────────────────────────────────────
+  document.getElementById('to-step-2').addEventListener('click', () => {
+    if (!validateSection(step1)) return;
+    const anyYes = Object.keys(parqQuestions).some(k => {
+      const r = document.querySelector(`input[name="${k}"][value="Yes"]`);
+      return r && r.checked;
+    });
+    if (anyYes) {
+      buildYesCards();
+      setStep(2);
+    } else {
+      setStep(3);
+    }
+  });
+
+  document.getElementById('back-to-1').addEventListener('click', () => setStep(1));
+
+  document.getElementById('to-step-3').addEventListener('click', () => {
+    const cardsOk = validateYesCards();
+    const conditionsOk = validateSection(step2);
+    if (!cardsOk || !conditionsOk) return;
+    setStep(3);
+  });
+
+  document.getElementById('back-to-2').addEventListener('click', () => {
+    // Go back to step 2 if any Yes was selected, otherwise step 1
+    const anyYes = Object.keys(parqQuestions).some(k => {
+      const r = document.querySelector(`input[name="${k}"][value="Yes"]`);
+      return r && r.checked;
+    });
+    setStep(anyYes ? 2 : 1);
+  });
+
+  document.getElementById('download-copy').addEventListener('click', () => {
+    downloadJSON(collectData());
+  });
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    consentError.textContent = '';
+    statusMessage.textContent = '';
+    statusMessage.className = '';
+
+    if (!consentCheckbox.checked) {
+      consentError.textContent = 'Please tick the consent box to confirm your declaration before submitting.';
+      return;
+    }
+    const ageCheckbox = document.getElementById('age-checkbox');
+    if (!ageCheckbox.checked) {
+      consentError.textContent = 'Please confirm you are 16 years of age or over before submitting.';
+      return;
+    }
+
+    const responses = collectData();
+    const clientName = (responses['client_name'] || 'Client').trim();
+    const dateStr = new Date().toLocaleDateString('en-IE', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const subject = `PAR-Q Form - ${clientName} ${dateStr}`;
+
+    if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL') {
+      const payload = {
+        subject: subject,
+        clientName: clientName,
+        submittedAt: new Date().toLocaleString('en-IE', { dateStyle:'full', timeStyle:'short' }),
+        ...responses
+      };
+
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        statusMessage.textContent = '✓ Form submitted successfully. Your responses have been saved and your instructor has been notified.';
+        statusMessage.className = 'status-success';
+        form.querySelectorAll('button[type="submit"]').forEach(b => b.disabled = true);
+      }).catch(() => {
+        statusMessage.textContent = 'Your form was completed but could not be sent automatically. Please download a copy below and share it with your instructor.';
+        statusMessage.className = 'status-warning';
+      });
+    } else {
+      statusMessage.textContent = 'Form completed. Note: Google Sheets is not yet configured. Please download a copy and share it with your instructor.';
+      statusMessage.className = 'status-warning';
+    }
+  });
+</script>
+</body>
+</html>
